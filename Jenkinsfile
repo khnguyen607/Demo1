@@ -23,8 +23,6 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    // Kill tiến trình đang chạy nếu có
-                    sh 'pkill -f "npm run serve" || true'
                     // Cài đặt và khởi chạy server
                     sh 'npm install'
                     // sh 'npm run serve > frontend.log 2>&1 &'

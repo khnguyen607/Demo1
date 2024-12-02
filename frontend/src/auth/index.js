@@ -7,7 +7,7 @@ const getToken = () => localStorage.getItem("access_token");
 
 // Tạo một instance của Axios
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000", // Đặt URL gốc của API
+  baseURL: "/", // Đặt URL gốc của API
   headers: {
     "Content-Type": "application/json", // Đặt header mặc định
   },
