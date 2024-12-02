@@ -1,0 +1,115 @@
+project-root/
+├── src/
+│   ├── config/             # Cấu hình dự án
+│   │   ├── database.js     # Kết nối cơ sở dữ liệu
+│   │   └── dotenv.js       # Load biến môi trường
+│   ├── controllers/        # Xử lý logic API
+│   │   └── userController.js
+│   ├── models/             # Định nghĩa các model (bảng)
+│   │   └── user.js
+│   ├── routes/             # Định nghĩa các route
+│   │   └── userRoutes.js
+│   ├── middlewares/        # Middleware tùy chỉnh (e.g., auth, logging)
+│   │   └── authMiddleware.js
+│   ├── utils/              # Các tiện ích chung
+│   │   └── responseHandler.js
+│   ├── app.js              # Cấu hình ứng dụng chính
+│   └── server.js           # Khởi chạy ứng dụng
+├── .env                    # Cấu hình môi trường
+├── .gitignore              # Ignore file không cần push lên git
+├── package.json            # File cấu hình npm
+└── README.md               # Mô tả dự án
+
+
+sql:
+SELECT 
+    mon.id AS id,
+    mon.userId AS userId,
+    mon.tern AS tern,
+    mon.income AS income,
+    mon.ads AS ads,
+    mon.teamId AS teamId,
+    mon.branchId AS branchId,
+    mon.win AS win,
+    mon.createdAt AS createdAt,
+    mon.updatedAt AS updatedAt,
+    u.name AS userName,
+    t.name AS teamName,
+    b.name AS branchName,
+    SUM(mar.income) AS incomeReal,
+    ROUND(SUM(mar.income) / COUNT(mar.income), 0) AS incomeAverage,
+    ROUND((SUM(mar.income) / mon.income) * 100, 0) AS completionRate,
+    SUM(mar.ads) AS adsReal,
+    ROUND((SUM(mar.ads) / SUM(mar.income)) * 100, 0) AS adsRate,
+    SUM(mar.win) AS winReal,
+    ROUND(
+        (
+            (SUM(mar.income) / COUNT(mar.income)) * 
+            (DAYOFMONTH(LAST_DAY(mon.tern)) - COUNT(mar.income)) +
+            SUM(mar.income)
+        ), 
+        0
+    ) AS incomeProjection,
+    ROUND(
+        (
+            (
+                (
+                    (SUM(mar.income) / COUNT(mar.income)) * 
+                    (DAYOFMONTH(LAST_DAY(mon.tern)) - COUNT(mar.income))
+                ) + 
+                SUM(mar.income)
+            ) / mon.income
+        ) * 100, 
+        0
+    ) AS completionProjection,
+    CASE 
+        WHEN ROUND(
+                (
+                    (
+                        (SUM(mar.income) / COUNT(mar.income)) * 
+                        (DAYOFMONTH(LAST_DAY(mon.tern)) - COUNT(mar.income))
+                    ) + 
+                    SUM(mar.income)
+                ) / mon.income * 100, 
+                0
+            ) >= 100 
+        THEN 'Xuất sắc'
+        WHEN ROUND(
+                (
+                    (
+                        (SUM(mar.income) / COUNT(mar.income)) * 
+                        (DAYOFMONTH(LAST_DAY(mon.tern)) - COUNT(mar.income))
+                    ) + 
+                    SUM(mar.income)
+                ) / mon.income * 100, 
+                0
+            ) >= 80 
+        THEN 'Tiêu chuẩn'
+        ELSE 'Chậm tiến độ'
+    END AS progressReview,
+    CASE 
+        WHEN ROUND((SUM(mar.ads) / SUM(mar.income)) * 100, 0) > 40 
+        THEN 'Quá ngưỡng'
+        ELSE 'Tiêu chuẩn'
+    END AS feeReview
+FROM 
+    macas.month_reports mon
+JOIN 
+    macas.marketing_reports mar 
+    ON DATE_FORMAT(mon.tern, '%Y-%m') = DATE_FORMAT(mar.date, '%Y-%m') 
+    AND mon.userId = mar.userId
+JOIN 
+    macas.users u 
+    ON mon.userId = u.id
+JOIN 
+    macas.teams t 
+    ON mon.teamId = t.id
+JOIN 
+    macas.branches b 
+    ON mon.branchId = b.id
+GROUP BY 
+    mon.id, 
+    u.name, 
+    t.name, 
+    b.name;
+
