@@ -11,7 +11,7 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('backend') {
-                    // Kill tiến trình đang chạy nếu có
+                    // Kill tiến trình đang chạy nếu có ds
                     sh 'pkill -f "npm run start" || true'
                     // Cài đặt và khởi chạy server
                     sh 'npm install'
