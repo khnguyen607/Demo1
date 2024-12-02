@@ -26,7 +26,7 @@ pipeline {
                     // Cài đặt và khởi chạy server
                     sh 'npm install'
                     // sh 'npm run serve > frontend.log 2>&1 &'
-                    // sh 'npm run build'
+                    sh 'npm run build'
 
                     sh 'cp -r dist /var/jenkins_home/workspace/deploy/'
                 }
