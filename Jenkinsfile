@@ -28,7 +28,7 @@ pipeline {
                     // Cài đặt và khởi chạy server
                     sh 'npm install'
                     // sh 'npm run serve > frontend.log 2>&1 &'
-                    sh 'npm run serve'
+                    sh 'npm run build'
                 }
             }
         }
